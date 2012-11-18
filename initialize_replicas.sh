@@ -6,7 +6,7 @@ pass=pass
 
 ldapsearch -x -H $host -D cn=directory\ manager -w $pass -s one \
     -LLLb  cn=replica,cn=\"dc=domain,dc=org\",cn=mapping\ tree,cn=config \
-    objectclass=nsds5replicationagreement dn |
+    '(|(objectclass=nsds5replicationagreement)(objectclass=nsDSWindowsReplicationAgreement))' dn |
 perl -0000 -n -e '
     s/\n\s//;
     s/\n//;
