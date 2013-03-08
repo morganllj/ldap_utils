@@ -37,8 +37,6 @@ if [ ! -z "$consumers" ]; then
     filter="(&${filter}))"
 fi
 
-echo $filter
-
 ldapsearch -x -H $host -D "$bind" -w $pass -s one \
     -LLLb  cn=replica,cn=\"dc=domain,dc=org\",cn=mapping\ tree,cn=config \
      "$filter" dn |
@@ -50,6 +48,6 @@ perl -0000 -n -e '
     print "replace: nsds5beginreplicarefresh\n";
     print "nsds5beginreplicarefresh: start\n\n"
 '|
-ldapmodify -H $host -D "$bind" -w $pass
+ldapmodify -x -H $host -D "$bind" -w $pass
 
 
