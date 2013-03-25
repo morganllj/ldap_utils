@@ -28,7 +28,6 @@ if ($field_names !~ /,/) {
 }
 
 my @field_names = split /\s*,\s*/, $field_names;
-print "field_names: @field_names\n";
 
 open (my $out, '>', $outfile) || die "can't open $outfile";
 
@@ -42,7 +41,6 @@ my $field_count = $#field_names + 1;
 my $i=0;
 my $user_index;
 for (@field_names) {
-
     $user_index = $i if (/^$index_field$/);
     $i++
 }
@@ -54,6 +52,8 @@ while (<>) {
 	print "one of your fields must be index field $index_field.\n";
 	exit;
     }
+
+    chomp $fields[$user_index];
 
     my $user = $fields[$user_index];
 
@@ -67,8 +67,6 @@ while (<>) {
 
 	my $value_found = 0;
 
-
-
 	if (exists $role_hash{$fields[$user_index]}) {
 	    for (@{$role_hash{$fields[$user_index]}{lc $field_names[$j]}}) {
 		$value_found = 1 if (lc $fields[$j] eq $_);
@@ -76,15 +74,14 @@ while (<>) {
 	}
 	next if ($value_found);
 
-
 	if ($field_names[$j] =~ /orgrolemdc/i) {
 	    $fields[$j] =~ s/"//;
 	    $fields[$j] =~ s/^([a-zA-Z0-9]+)\s+.*/$1/;
-
-#	    print "fixed rolemdc: $fields[$j]\n";
 	}
 
-	push @{$role_hash{$fields[$user_index]}{lc $field_names[$j]}}, $fields[$j];
+	push @{$role_hash{$fields[$user_index]}{lc $field_names[$j]}}, $fields[$j] unless
+	  grep (/$fields[$j]/i, @{$role_hash{$fields[$user_index]}{lc $field_names[$j]}});
+
 	$j++;
     }
 
@@ -118,7 +115,6 @@ for my $index (keys %role_hash) {
 	print_dn($dn) unless ($dn_printed);
 	print $out "add: objectclass\nobjectclass: orgRole\n";
 	$dn_printed = 1;
-
     }
 
     for my $attr (keys %{$role_hash{$index}}) {
