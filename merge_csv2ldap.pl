@@ -10,7 +10,7 @@ sub print_dn($);
 sub print_usage();
 
 my %opts;
-getopts ('o:f:i:', \%opts);
+getopts ('o:f:i:r', \%opts);
 
 my $outfile = $opts{o} || print_usage();
 my $field_names = $opts{f} || print_usage();
@@ -126,7 +126,11 @@ for my $index (keys %role_hash) {
 		    } else {
 			print_dn($dn) 
 		    }
-		    print $out "add: $attr\n$attr: $value\n";
+		    if (exists $opts{r}) {
+			print $out "replace: $attr\n$attr: $value\n";
+		    } else {
+			print $out "add: $attr\n$attr: $value\n";
+		    }
 		    $dn_printed = 1;
 		}
 	    } else {
@@ -150,8 +154,9 @@ sub print_dn ($) {
 }
 
 sub print_usage() {
-    print "\nusage: $0 -o output.ldif -f <fields> [-i <index field>]\n";
+    print "\nusage: $0 -o output.ldif -f <fields> [-i <index field>] [-r]\n";
     print "\t-f <fields> comma separated list of fields.  One must be user to link to an account\n";
+    
 #    print "\t-0 add leading zeros to empids\n";
     exit;
 }
