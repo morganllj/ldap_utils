@@ -100,7 +100,7 @@ for my $index (keys %role_hash) {
     my $dn = (keys %$href)[0];
     
     if (!defined $dn) {
-	print "no ldap record for $index_field=$index\n"
+	print "no ldap record for /$index_field=$index/\n"
 	    if ($index !~ /^\s*$/);
 	next;
     }
