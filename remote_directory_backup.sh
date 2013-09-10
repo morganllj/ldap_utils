@@ -26,8 +26,8 @@ function backup() {
     echo; echo; echo "***working on ${h}..."
     bases=`ldapsearch -x -H ${_protocol}://${_host}.${_domain} -LLLb "" -s base objectclass=\* namingcontexts|awk '{print $2}'|egrep -v '^$'`
     for b in $bases; do
-    	echo ssh ${_host}.${_domain} -l root "${_db2ldif_base}${h}/db2ldif -s $b && gzip -v ${_backups_remote_base}$h/ldif/*ldif"
-    	ssh ${_host}.${_domain} -l root "${_db2ldif_base}${h}/db2ldif -s $b && gzip -v ${_backups_remote_base}$h/ldif/*ldif"
+    	echo ssh ${_host}.${_domain} -l root "${_db2ldif_base}${h}/db2ldif -s $b && gzip -v ${_backups_remote_base}$h/ldif/*ldif && find ${_backups_remote_base}/${h}/ldif -mtime +90 -delete"
+    	ssh ${_host}.${_domain} -l root "${_db2ldif_base}${h}/db2ldif -s $b && gzip -v ${_backups_remote_base}$h/ldif/*ldif && find ${_backups_remote_base}${h}/ldif -mtime +90 -delete"
     done
     echo
     echo rsync -avHe "ssh -l root" ${_host}.${_domain}:${_backups_remote_base} ${_host}/ldif/ $backups_local_base
