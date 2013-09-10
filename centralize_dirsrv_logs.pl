@@ -4,7 +4,10 @@
 #
 use strict;
 
-my @dir_hosts = qw/ldapm01-mgmt ldapm02-mgmt ldap01-mgmt ldap02-mgmt devldap01-mgmt devldap02-mgmt ldap0 ldap3 ds01-mgmt ds02-mgmt/;
+my @dir_hosts = qw/host1 host2 host3/;
+push @dir_hosts, qw/ldap0 ldap3/;
+push @dir_hosts, qw/host4 host5 host6/;
+push @dir_hosts, qw/host7 host8 host9/;
 my $log_host="rsyslog1.oit.domain.org";
 
 my $remote_location="/var/log/dirsrv";
