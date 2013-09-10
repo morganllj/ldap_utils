@@ -23,37 +23,32 @@ if (defined $ARGV[1]) {
     $in = "STDIN";
 }
 
+my %conns;
+my @conns_to_print;
 
 while (<$in>) {
     chomp;
 
     my ($conn) = /conn=(\d+)\s+/;
 
-    $prev_conn = $conn
-      if (!defined $prev_conn);
+    next
+      if (!defined $conn);
 
-    if ($conn != $prev_conn) {
-	if (/$value/i || $found) {
-	    print @buffer;
-	    print "\n";
-	}
+    push @{$conns{$conn}}, $_;
 
-	@buffer = ();
-	$prev_conn = undef;
-	$found = 0;
-    }
-
-    $found = 1
+    push @conns_to_print, $conn
       if (/$value/i);
 
-    push @buffer, $_;
-
+    for my $conn (@conns_to_print) {
+	if (exists $conns{$conn}) {
+	    print @{$conns{$conn}};
+	    print "\n";
+	    delete $conns{$conn};
+	}
+    }
 }
 
-if (grep (/$value/i, @buffer) || $found) {
-    print @buffer;
-    print "\n";
-}
+
 
 
 
