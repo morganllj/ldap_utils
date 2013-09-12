@@ -1,0 +1,1 @@
+for i in `ls slapd-ldap??/access* slapd-ldapm??/access* |egrep '201308|201309'`; do echo "**** $i";  for j in `grep -i wifilink $i|grep -i bind|awk '{print $3}'`; do grep $j $i|grep 'connection from'; done; done| tee /var/tmp/wifilink_connections.txt
