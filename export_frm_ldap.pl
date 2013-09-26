@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 #
+# Morgan Jones (morgan@morganjones.org)
+#
+# export attribute values from ldap with an ldapsearch-like command line interface.
+# the format is CSV, the first attribute should be a unique value like uid or employeeid
 
 use strict;
 use Net::LDAP;
@@ -13,6 +17,7 @@ getopts('H:D:b:y:w:s', \%opts);
 
 exists $opts{D} || print_usage();
 exists $opts{b} || print_usage();
+exists $opts{H} || print_usage();
 (exists $opts{y} || exists $opts{w}) || print_usage();
 my $filter = shift @ARGV;
 
@@ -66,7 +71,8 @@ if ($#attrs < 0) {
 
 
 sub print_usage {
-    print "usage: $0 [-s] -D binddn -b basedn -y passfile || -w pass\n\n";
+    print "usage: $0 [-s] -H <host ldap url> -D binddn -b basedn -y passfile || -w pass\n <filter> <attrs, unique attr first>";
     print "\t-s skip if attributes are empty\n";
+    print "\n";
     exit;
 }

@@ -1,5 +1,14 @@
 #!/usr/bin/perl -w
 #
+# Morgan Jones (morgan@morganjones.org)
+#
+# import attribute values from a CSV into ldap with an ldapsearch-like command line interface.
+#
+# Designed to take the output of export_frm_ldap.pl but the format is
+# just a primary key (uid, employeeid) and any number of trailing
+# values comma separated.
+#
+# currenlty only adds values and only if the value doesn't exist already.  That should change soon of course.
 
 use strict;
 use Net::LDAP;
@@ -13,6 +22,7 @@ getopts('H:D:f:b:y:w:sn', \%opts);
 
 exists $opts{D} || print_usage();
 exists $opts{b} || print_usage();
+exists $opts{H} || print_usage();
 (exists $opts{y} || exists $opts{w}) || print_usage();
 
 my $pass;
@@ -27,6 +37,8 @@ if (exists $opts{y}) {
 my @attrs = @ARGV
   if ($#ARGV>-1);
 
+print "attrs: ", join (',', @attrs), "\n";
+
 @ARGV = ();
 
 my $ldap=Net::LDAP->new($opts{H}) || die "$@";
@@ -38,6 +50,8 @@ while (<>) {
     chomp;
 
     my @import_values = split /,/;
+    push @import_values, "" 
+      if /\,\s*$/;
     if ($#attrs != $#import_values) {
 	print "wrong number of values: /$_/ ", $#attrs+1, " passed on the command line, ", $#import_values+1, " in ldap.  skipping.\n";
 	next;
@@ -105,7 +119,8 @@ exit;
 
 
 sub print_usage {
-    print "usage: $0 [-s] [ -D binddn -b basedn -y passfile || -w pass\n\n";
+    print "usage: cat file.csv | $0 [-s] [-n] -H <host ldapurl> -D binddn -b basedn -y passfile || -w pass <attrs>\n\n";
+    print "\t-n print, don't execute changes\n";
     print "\t-b basedn base to import data into\n";
     print "\t-s skip entire entry if attributes are empty\n";
     exit;
