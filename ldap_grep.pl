@@ -10,8 +10,6 @@ if (!defined $ARGV[0]) {
 
 my $value = $ARGV[0];
 
-my @buffer;
-my $prev_conn;
 my $found=0;
 
 $,="\n";
@@ -30,20 +28,15 @@ while (<$in>) {
     chomp;
 
     my ($conn) = /conn=(\d+)\s+/;
-
     next
       if (!defined $conn);
 
     push @{$conns{$conn}}, $_;
 
-    push @conns_to_print, $conn
-      if (/$value/i);
-
-    for my $conn (@conns_to_print) {
+    if (/$value/i) {
 	if (exists $conns{$conn}) {
 	    print @{$conns{$conn}};
-	    print "\n";
-	    delete $conns{$conn};
+	    delete $conns{$conn}
 	}
     }
 }
