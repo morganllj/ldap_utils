@@ -2,27 +2,46 @@
 #
 
 use strict;
+use Getopt::Std;
 
-if (!defined $ARGV[0]) {
-    print "\nusage: $0 PATTERN [file]\n\n";
-    exit;
+sub print_usage();
+
+print_usage()
+  if (!defined $ARGV[-1]);
+
+my %opts;
+getopt('v', \%opts);
+
+$,=$\="\n";
+
+my $value;
+if (exists $opts{v}) {
+    $value = $opts{v};
+} else {
+    if ($#ARGV == 0) {
+	$value = $ARGV[-1];
+    } else {
+	$value = $ARGV[-2];
+    }
 }
 
-my $value = $ARGV[0];
+for my $k (keys %opts) {
+    print_usage()
+      if ($k ne "v")
+}
 
 my $found=0;
 
-$,="\n";
-
 my $in;
-if (defined $ARGV[1]) {
-    open ($in, $ARGV[1]) || die "can't open $ARGV[2]";
+#if (defined $ARGV[-1]) {
+if ($#ARGV > 0) {
+    open ($in, $ARGV[-1]) || die "can't open $ARGV[-1]";
 } else {
     $in = "STDIN";
 }
 
 my %conns;
-my @conns_to_print;
+my %matching_conns;
 
 while (<$in>) {
     chomp;
@@ -33,8 +52,26 @@ while (<$in>) {
 
     push @{$conns{$conn}}, $_;
 
-    if (/$value/i) {
-	if (exists $conns{$conn}) {
+    if (!exists $opts{v}) {
+	if (/$value/i) {
+	    $matching_conns{$conn} = 1;
+	    if (exists $conns{$conn}) {
+		if (!exists ($opts{v})) {
+		    print @{$conns{$conn}};
+		    delete $conns{$conn}
+		}
+	    }
+	} elsif (exists $matching_conns{$conn}) {
+	    if (!exists $opts{v}) {
+		print "$_";
+		pop @{$conns{$conn}};
+	    }
+	}
+    } else {
+	$matching_conns{$conn} = 1
+	  if (/$value/);
+
+	if (/closed/ && !exists ($matching_conns{$conn})) {
 	    print @{$conns{$conn}};
 	    delete $conns{$conn}
 	}
@@ -45,3 +82,9 @@ while (<$in>) {
 
 
 
+
+
+sub print_usage() {
+    print "\nusage: $0 PATTERN [file]\n\n";
+    exit;
+}
