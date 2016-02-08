@@ -1,6 +1,15 @@
 #!/usr/bin/perl -w
 #
 
+# morgan@morganjones.org 2015
+#
+# Compare expiration dates (in ldap date format) between two ldap
+# environments and update if the times are within 90 days of each
+# other.  This was used to sync dates between two environments that
+# had been maintained by a script that set the dates independently so
+# with differing run times and schedules the dates should have been
+# within a few days of each other.
+
 # ldapsearch -w pass -h host -x -LLLb base -D uid=morgan,ou=people,dc=domain,dc=org '(&(|(objectclass=orgperson)(objectclass=orgnonperson))(orgactiveinactive=i))' uid orghrexpirationdate| ./convert_expiration_dates.pl
 
 use strict;
