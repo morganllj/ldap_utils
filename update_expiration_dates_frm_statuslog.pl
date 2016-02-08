@@ -1,5 +1,14 @@
 #!/usr/bin/perl -w
 #
+# morgan@morganjones.org 2015
+#
+# While reconciling account expiration dates we identified a group of
+# users that needed to have their expiration dates replaced but we had
+# no value.  We marked their expiration date as 'replace' and followed
+# with this script to pull their expiration date from accountstatuslog
+# which is a custom attribute contains logs for changes we made to
+# users.  In this case we add 1095 days (3 years) to the latest date they were
+# expired by HR.
 
 use strict;
 use Date::Pcalc qw(Delta_Days);
