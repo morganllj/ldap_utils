@@ -28,13 +28,13 @@ if (exists $opts{n}) {
 };
 
 
-my $ldap = Net::LDAP->new("devldapm.domain.net") || die "$@";
+my $ldap = Net::LDAP->new("ldaps://devldapm.domain.net") || die "$@";
 my $bind_rslt = $ldap->bind("uid=morgan,ou=employees,dc=domain,dc=org", password=>"pass");
 $bind_rslt->code && die "problem binding: ", $bind_rslt->error;
 
 my $rslt = $ldap->search(base=>"dc=domain,dc=org", 
 			 filter=>"(orgaccountexpirationdate=replace)",
-			 attrs=>["orgaccountexpirationdate", "uid", "orgaccountstatuslog"]);
+			 attrs=>["orgaccountexpirationdate", "uid", "orgaccountstatuslog", "orgaccountactive"]);
 $rslt->code && die "problem searching: ", $rslt->error;
 
 for my $entry ($rslt->entries) {
@@ -42,16 +42,19 @@ for my $entry ($rslt->entries) {
     my $old_expiration = $entry->get_value("orgaccountexpirationdate");
     my $uid = $entry->get_value("uid");
     my @account_status_log = $entry->get_value("orgaccountstatuslog");
+    my $account_active = $entry->get_value("orgaccountactive");
 
     my $dn = $entry->dn;
 
     print "$uid ";
+    print "$account_active ";
 
     my $most_recent_disable_date;
     my $number_of_disable_dates = 0;
+    my $disable_date;
     for (@account_status_log) {
 	if (/(.*)\s+ams2ldap disabled by HR/) {
-	    my $disable_date = $1;
+	    $disable_date = $1;
 	    $number_of_disable_dates++;
 	    if ($disable_date !~ /Z$/) {
 		print "Not in GMT!? $disable_date. Skipping.\n";
@@ -85,7 +88,11 @@ for my $entry ($rslt->entries) {
 	}
     }
 
-    print "$number_of_disable_dates ";
+    if (defined $disable_date) {
+	print "$disable_date ";
+    } else {
+	print "none ";
+    }
 
     my $expiration_date;
     if (defined $most_recent_disable_date) {
@@ -103,19 +110,31 @@ for my $entry ($rslt->entries) {
 	
 	$expiration_date  = $exp_year . $exp_month++ . $exp_day . $time ;
     } else {
-	print "Warning: $uid has an accountexpiration of replace but no accountstatuslog with a disable date!\n";
+	print "none\n";
 	next;
     }
 
-    print "$expiration_date ";
 
-    unless (exists $opts{n}) {
-	my $mod_result = $ldap->modify( $dn, 
-					replace => { orgaccountexpirationdate => $expiration_date });
-	$mod_result->code && die "problem modifying ldap: ", $mod_result->error;
+    if ($account_active =~ /false/i) {
+	print "$expiration_date ";
+
+	unless (exists $opts{n}) {
+	    my $mod_result = $ldap->modify( $dn, 
+					    replace => { orgaccountexpirationdate => $expiration_date });
+	    $mod_result->code && die "problem modifying ldap: ", $mod_result->error;
+	}
+    } elsif ($account_active =~ /true/i) {
+	print "none ";
+	
+	unless (exists $opts{n}) {
+	    my $mod_result = $ldap->modify( $dn, 
+					    delete => ['orgaccountexpirationdate']);
+	    $mod_result->code && die "problem modifying ldap: ", $mod_result->error;
+	}
+    } else {
+	print "ignored--orgaccountstatus "
     }
 
-    print "success";
     print "\n";
 }
 
