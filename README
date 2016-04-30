@@ -3,4 +3,5 @@
 Morgan Jones
 morgan@morganjones.org
 
-A motley collection of utilities and code snippets I've used sometimes only once to manipulate or report on ldap data.
+A collection of utiities for ldap administration.
+This is a catch-all for one-offs and incomplete scripts, more together scripts are in their own repositories. 
