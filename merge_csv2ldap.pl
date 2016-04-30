@@ -31,7 +31,7 @@ my @field_names = split /\s*,\s*/, $field_names;
 
 open (my $out, '>', $outfile) || die "can't open $outfile";
 
-my $ldap = Net::LDAP->new("ldapm01.domain.org");
+my $ldap = Net::LDAP->new("ldap.domain.org");
 my $r = $ldap->bind(dn=>"uid=morgan,ou=employees,dc=domain,dc=org", password=>"pass");
 $r->code && die "unable to bind to ldap: ", $r->error;
 
@@ -91,7 +91,7 @@ while (<>) {
 for my $index (keys %role_hash) {
     chomp $index;
 
-    my $sr = $ldap->search(base=>"ou=employees,dc=domain,dc=org", 
+    my $sr = $ldap->search(base=>"dc=domain,dc=org", 
 			   filter=>"$index_field=$index");
     $sr->code && die $sr->error;
 
@@ -111,15 +111,17 @@ for my $index (keys %role_hash) {
     }
 
     my $dn_printed = 0;
-    if (!grep(/orgrole/i, @{$href->{$dn}->{objectclass}})) {
-	print_dn($dn) unless ($dn_printed);
-	print $out "add: objectclass\nobjectclass: orgRole\n";
-	$dn_printed = 1;
-    }
+    # if (!grep(/orgrole/i, @{$href->{$dn}->{objectclass}})) {
+    # 	print_dn($dn) unless ($dn_printed);
+    # 	print $out "add: objectclass\nobjectclass: orgRole\n";
+    # 	$dn_printed = 1;
+    # }
 
     for my $attr (keys %{$role_hash{$index}}) {
 	for my $value (@{$role_hash{$index}{$attr}}) {
 	    if (exists $href->{$dn}->{$attr}) {
+		$value =~ s/\+/\\\+/;
+		$value =~ s/\*/\\\*/;
 		if (!grep /^$value$/, @{$href->{$dn}->{$attr}}) {
 		    if ($dn_printed) {
 			print $out "-\n";
@@ -154,8 +156,11 @@ sub print_dn ($) {
 }
 
 sub print_usage() {
-    print "\nusage: $0 -o output.ldif -f <fields> [-i <index field>] [-r]\n";
-    print "\t-f <fields> comma separated list of fields.  One must be user to link to an account\n";
+    print "\nusage: cat input.csv | $0 -o output.ldif -f <fields> [-i <index field>] [-r]\n";
+    print "\t-f <fields> comma separated list of fields.\n";
+    print "[-r] replace (rather than add)\n";
+    print "\t\tOne must be user to link to an account\n";
+
     
 #    print "\t-0 add leading zeros to empids\n";
     exit;
