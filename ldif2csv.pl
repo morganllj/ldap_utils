@@ -5,7 +5,7 @@ $/="";
 while (<>) {
     s/\n //;
 
-    my @e = sort split /\n/;
+    my @e = split /\n/;
     my $c=0;
 
     for (@e) {
