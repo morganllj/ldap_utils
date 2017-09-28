@@ -3,8 +3,8 @@
 
 e="morgan@domain.org"
 p="/usr/sbin/ns-slapd"
-h=`hostname`
-r="service dirsrv start"
+h=`/bin/hostname`
+r="/sbin/service dirsrv start"
 
 c=`ps auxwww|grep ${p}|grep -v grep`;
 
