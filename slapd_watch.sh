@@ -6,9 +6,9 @@ p="/usr/sbin/ns-slapd"
 h=`hostname`
 r="service dirsrv start"
 
-r=`ps auxwww|grep ${p}|grep -v grep`;
+c=`ps auxwww|grep ${p}|grep -v grep`;
 
-if [ -z "$r" ]; then
+if [ -z "$c" ]; then
     ( echo "attemping ${p} restart on ${h} at `date`:" 
       echo
       $r
