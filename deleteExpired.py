@@ -1,6 +1,16 @@
+#!/usr/bin/python3
+#
 ### After three years, employee records can be removed. Nightly script will pass EIDN and Email of user. Remove user from Google World.
 
+import sys, getopt
 
+
+def print_usage():
+    print ("usage: "+sys.argv[0]+" [-n] -u <user> -e <eidn>")
+    exit()
+
+
+        
 def expireGoogleAccount(a,b):
     user=a
     eidn=b
@@ -66,3 +76,21 @@ def expireGoogleAccount(a,b):
         print("ERROR! EIDNs do NOT match.")
         return 1
         
+# begin main here
+
+user=print_only=eidn=None
+
+opts, args = getopt.getopt(sys.argv[1:], "nu:e:")
+
+for opt, arg in opts:
+    if opt in ('-n'):
+        print_only = 1
+    elif opt in ('-u'):
+        user = arg
+    elif opt in ('-e'):
+        eidn = arg
+
+if eidn is None or user is None:
+    print_usage()
+
+print ("eidn: ", eidn, "user: ", user, "print_only: ", print_only)    
