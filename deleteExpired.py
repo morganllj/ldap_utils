@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 #
-### After three years, employee records can be removed. Nightly script will pass EIDN and Email of user. Remove user from Google World.
+### After three years, employee records can be removed. Nightly script
+### will pass EIDN and Email of user. Remove user from Google World.
+# sample usage:
+# ./deleteExpired.py -n -s dirusermanager@philasd.org -f ~morgan/groups-22cf591118c1.json -u morgan -e 9000000015
 
 import sys
 import getopt
